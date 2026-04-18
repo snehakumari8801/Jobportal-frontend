@@ -1,14 +1,179 @@
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import axiosInstance from "../api/axiosInstance";
-import { FaBell, FaTimes, FaUserCircle, FaBriefcase } from "react-icons/fa";
+import { FaBell, FaTimes } from "react-icons/fa";
 import { io } from "socket.io-client";
 
-// const socket = io("http://localhost:5000");
 const socket = io("https://jobportal-backend-be9i.onrender.com");
+
+const styles = {
+  nav: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    zIndex: 50,
+    background: "linear-gradient(135deg, #0f0c29 0%, #1a1a2e 50%, #16213e 100%)",
+    borderBottom: "1px solid rgba(255,255,255,0.07)",
+    backdropFilter: "blur(12px)",
+  },
+
+  inner: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "0 16px",
+    height: "60px",
+    maxWidth: "1400px",
+    margin: "0 auto",
+  },
+
+  left: {
+    marginLeft: "10px",
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    cursor: "pointer",
+  },
+
+  logoBox: {
+    marginLeft: "40px",
+    width: "60px",
+    height: "40px",
+    borderRadius: "6px",
+    overflow: "hidden",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  brandName: {
+    fontWeight: 700,
+    fontSize: "16px",
+    color: "#fff",
+  },
+
+  right: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+  },
+
+  bellBtn: {
+    position: "relative",
+    background: "rgba(255,255,255,0.07)",
+    border: "1px solid rgba(255,255,255,0.1)",
+    borderRadius: "10px",
+    width: "38px",
+    height: "38px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    color: "#cbd5e1",
+  },
+
+  badge: {
+    position: "absolute",
+    top: "-4px",
+    right: "-4px",
+    background: "#f43f5e",
+    color: "#fff",
+    fontSize: "10px",
+    width: "16px",
+    height: "16px",
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  // ✅ FIXED DROPDOWN (RESPONSIVE)
+  dropdown: {
+    position: "absolute",
+    right: 0,
+    top: "calc(100% + 10px)",
+    width: "min(320px, 92vw)",   // 🔥 IMPORTANT FIX
+    maxWidth: "320px",
+
+    background: "#fff",
+    borderRadius: "14px",
+    boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
+    overflow: "hidden",
+    zIndex: 9999,
+  },
+
+  dropHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: "12px 14px",
+    borderBottom: "1px solid #eee",
+    background: "#fafafa",
+  },
+
+  dropBody: {
+    maxHeight: "300px",
+    overflowY: "auto",
+  },
+
+  notifItem: {
+    padding: "12px",
+    borderBottom: "1px solid #f1f5f9",
+    fontSize: "13px",
+    cursor: "pointer",
+  },
+
+  emptyMsg: {
+    padding: "20px",
+    textAlign: "center",
+    fontSize: "13px",
+    color: "#888",
+  },
+
+  avatarBtn: {
+    width: "36px",
+    height: "36px",
+    borderRadius: "50%",
+    background: "#6c63ff",
+    color: "#fff",
+    fontWeight: 700,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+  },
+
+  profileDropdown: {
+    position: "absolute",
+    right: 0,
+    top: "calc(100% + 10px)",
+    width: "200px",
+    background: "#fff",
+    borderRadius: "12px",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+    overflow: "hidden",
+    zIndex: 9999,
+  },
+
+  spacer: {
+    height: "60px",
+  },
+};
 
 export default function Navbar() {
   const { setUser } = useAuth();
@@ -23,129 +188,57 @@ export default function Navbar() {
 
   const employer = JSON.parse(localStorage.getItem("employer"));
   const student = JSON.parse(localStorage.getItem("student"));
+
   const userData = employer || student;
   const role = employer ? "employer" : "student";
 
-  // ---------------- OUTSIDE CLICK ----------------
+  // socket
   useEffect(() => {
-    const handler = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setOpen(false);
-      }
-      if (profileRef.current && !profileRef.current.contains(e.target)) {
-        setProfileOpen(false);
-      }
-    };
+    if (!userData) return;
 
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
+    socket.emit("register", {
+      userId: userData._id,
+      role,
+    });
 
-  // ---------------- SOCKET ----------------
-  useEffect(() => {
-    if (!userData || !role) return;
-
-    socket.emit("register", { userId: userData._id, role });
-
-    const eventName =
+    const event =
       role === "employer"
         ? "employer-notification"
         : "student-notification";
 
-    socket.on(eventName, (data) => {
-      setNotifications((prev) => {
-        const exists = prev.some((n) => n._id === data._id);
-        if (exists) return prev;
-        return [data, ...prev];
-      });
+    socket.on(event, (data) => {
+      setNotifications((prev) => [data, ...prev]);
     });
 
-    return () => socket.off(eventName);
-  }, [userData, role]);
+    return () => socket.off(event);
+  }, []);
 
-  // ---------------- FETCH ----------------
-  const fetchNotifications = async () => {
-    try {
+  // fetch notifications
+  useEffect(() => {
+    const fetchData = async () => {
       const url =
         role === "student"
           ? "/students/notifications"
           : "/employers/notifications";
 
       const res = await axiosInstance.get(url, {
-        headers: { Authorization: `Bearer ${userData?.token}` },
+        headers: {
+          Authorization: `Bearer ${userData?.token}`,
+        },
       });
 
       setNotifications(res.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+    };
 
-  useEffect(() => {
-    fetchNotifications();
-  }, [role]);
+    fetchData();
+  }, []);
 
-  // ---------------- MARK ALL SEEN ----------------
-  const markAllSeen = async () => {
-    try {
-      if (notifications.length === 0) return;
-
-      const url =
-        role === "student"
-          ? "/students/notifications"
-          : "/employers/notifications";
-
-      await axiosInstance.patch(
-        url,
-        {},
-        {
-          headers: { Authorization: `Bearer ${userData?.token}` },
-        }
-      );
-
-      setNotifications([]);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  // ---------------- HANDLERS ----------------
-  const handleBellClick = async () => {
-    if (open) await markAllSeen();
+  const handleBellClick = () => {
     setOpen(!open);
     setProfileOpen(false);
   };
 
-  const handleClose = async () => {
-    await markAllSeen();
-    setOpen(false);
-  };
-
-  const handleNotificationClick = (n) => {
-    setOpen(false);
-
-    if (role === "student" && n.jobId)
-      navigate(`/student/job/${n.jobId}`);
-
-    if (role === "employer" && n.jobId)
-      navigate(`/employer/job/${n.jobId}/applicants`);
-  };
-
-  const handleProfileNavigate = () => {
-    setProfileOpen(false);
-    navigate(
-      role === "employer"
-        ? "/employer/profile"
-        : "/student/profile"
-    );
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem("student");
-    localStorage.removeItem("employer");
-    navigate("/login");
-  };
+  const handleClose = () => setOpen(false);
 
   const initials = userData?.name
     ? userData.name
@@ -155,182 +248,148 @@ export default function Navbar() {
       .toUpperCase()
       .slice(0, 2)
     : role === "employer"
-      ? "EM"
+      ? userData?.company?.slice(0, 2).toUpperCase()
       : "ST";
 
   return (
     <>
-      {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 w-full z-50 bg-[#1a1a2e] text-white">
-        <div className="flex items-center justify-between px-3 sm:px-5 md:px-6 py-3">
-
+      <nav style={styles.nav}>
+        <div style={styles.inner}>
           {/* LEFT */}
           <div
-            className="flex items-center gap-2 cursor-pointer pl-10 sm:pl-0"
+            style={styles.left}
             onClick={() =>
-              navigate(
-                role === "employer"
-                  ? "/employer/dashboard"
-                  : "/student/dashboard"
-              )
+              navigate(role === "employer" ? "/employer/dashboard" : "/student/dashboard")
             }
           >
-            <div className="w-8 h-8 sm:w-9 sm:h-9 md:ml-9  rounded-xl bg-white/20 flex items-center justify-center">
-              <FaBriefcase />
+            {/* ── LEFT: Logo + Brand (no Create Job button here anymore) ── */}
+            {/* <div
+           style={styles.left}
+            onClick={() => navigate(role === "employer" ? "/employer/dashboard" : "/student/dashboard")}
+          > */}
+            <div style={styles.logoBox}>
+              <img
+                src="/rnu.jpg"
+                alt="logo"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
             </div>
-
-            <span className="font-bold text-sm sm:text-base md:text-lg hidden xs:block">
-              Job App
-            </span>
-
-
-            {/* CREATE JOB */}
-            {role === "employer" && (
-              <button
-                onClick={() => navigate("/employer/jobpost")}
-                className="bg-green-500 px-4 py-1 rounded"
-              >
-                + Create Job
-              </button>
-            )}
+            <span style={styles.brandName}>Job App</span>
           </div>
+          {/* </div> */}
 
           {/* RIGHT */}
-          <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-
-            {/* 🔔 NOTIFICATIONS */}
-            {role && (
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={handleBellClick}
-                  className="relative p-2 hover:bg-white/10 rounded-lg"
-                >
-                  <FaBell />
-
-                  {notifications.length > 0 && (
-                    <span className="
-                      absolute -top-1 -right-1
-                      bg-red-500 text-[10px]
-                      w-4 h-4 flex items-center justify-center
-                      rounded-full
-                    ">
-                      {notifications.length > 9 ? "9+" : notifications.length}
-                    </span>
-                  )}
-                </button>
-
-                {/* ✅ FINAL FIXED DROPDOWN */}
-                {open && (
-                  <div
-                    className="
-      fixed sm:absolute
-      right-2 sm:right-0
-      top-16 sm:top-auto
-      w-[92vw] sm:w-80
-      max-h-[70vh]
-      bg-white text-black
-      rounded-xl shadow-2xl
-      z-[99999]
-      border border-gray-200
-      overflow-hidden
-    "
-                  >
-                    {/* HEADER */}
-                    <div className="flex justify-between items-center p-3 border-b bg-white sticky top-0 z-10">
-                      <span className="font-semibold text-sm">
-                        Notifications
-                      </span>
-                      <FaTimes
-                        className="cursor-pointer text-gray-500 hover:text-red-500"
-                        onClick={handleClose}
-                      />
-                    </div>
-
-                    {/* BODY */}
-                    <div className="overflow-y-auto max-h-[60vh]">
-                      {notifications.length === 0 ? (
-                        <p className="p-4 text-center text-gray-400 text-sm">
-                          No notifications
-                        </p>
-                      ) : (
-                        notifications.map((n) => (
-                          <div
-                            key={n._id}
-                            onClick={() => handleNotificationClick(n)}
-                            className="
-              p-3 border-b last:border-0
-              hover:bg-gray-50 cursor-pointer
-              text-sm active:bg-gray-100
-              break-words whitespace-normal
-              leading-snug
-            "
-                          >
-                            {n.message}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
+          <div style={styles.right}>
+            {/* BELL */}
+            <div style={{ position: "relative" }} ref={dropdownRef}>
+              <button style={styles.bellBtn} onClick={handleBellClick}>
+                <FaBell />
+                {notifications.length > 0 && (
+                  <span style={styles.badge}>{notifications.length}</span>
                 )}
+              </button>
+
+              {open && (
+                <div style={styles.dropdown}>
+                  <div style={styles.dropHeader}>
+                    <b>Notifications</b>
+                    <FaTimes onClick={handleClose} style={{ cursor: "pointer" }} />
+                  </div>
+
+                  <div style={styles.dropBody}>
+                    {notifications.length === 0 ? (
+                      <p style={styles.emptyMsg}>No notifications</p>
+                    ) : (
+                      notifications.map((n) => (
+                        <div key={n._id} style={styles.notifItem}>
+                          {n.message}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+
+            {/* PROFILE */}
+            <div style={{ position: "relative", textAlign: "center", fontSize: "15px", fontWeight: "800px" }} ref={profileRef}>
+              <div
+                style={styles.avatarBtn}
+                onClick={() => {
+                  setProfileOpen(!profileOpen);
+                  setOpen(false);
+                }}
+              >
+                {initials}
               </div>
-            )}
 
-            {/* 👤 PROFILE */}
-            {role && (
-              <div className="relative" ref={profileRef}>
-                <button
-                  onClick={() => {
-                    setProfileOpen(!profileOpen);
-                    setOpen(false);
-                  }}
-                  className="
-                    w-8 h-8 sm:w-9 sm:h-9
-                    rounded-full bg-white/20
-                    flex items-center justify-center
-                    text-xs font-bold
-                  "
-                >
-                  {initials}
-                </button>
+              {profileOpen && (
+                <div style={styles.profileDropdown}>
 
-                {profileOpen && (
-                  <div className="
-                    absolute right-0 mt-2
-                    w-48 bg-white text-black
-                    rounded-xl shadow-xl z-50
-                  ">
-                    <div className="px-3 py-2 border-b bg-gray-50">
-                      <p className="text-xs font-semibold truncate">
-                        {userData?.name}
-                      </p>
-                      <p className="text-xs text-gray-400 capitalize">
-                        {role}
-                      </p>
-                    </div>
+                  {/* HEADER */}
+                  <div style={{ padding: "10px", fontSize: "13px" }}>
+                    <p style={{ margin: 0, fontWeight: 600 }}>
+                      {role === "employer" ? userData?.company : userData?.name}
+                    </p>
 
-                    <button
-                      onClick={handleProfileNavigate}
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                    <p style={{ margin: 0, fontSize: "15px", color: "#191919" }}>
+                      {role}
+                    </p>
+                  </div>
+
+                  <hr />
+
+                  {/* VIEW PROFILE (ONLY STUDENT) */}
+                  {role === "student" && (
+                    <div
+                      onClick={() => {
+                        setProfileOpen(false);
+                        navigate("/student/profile");
+                      }}
+                      style={{ padding: "10px", cursor: "pointer" }}
                     >
                       View Profile
-                    </button>
+                    </div>
+                  )}
 
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-3 py-2 text-sm text-red-500 hover:bg-red-50"
+                  {/* CREATE JOB (ONLY EMPLOYER) */}
+                  {role === "employer" && (
+                    <div
+                      onClick={() => {
+                        setProfileOpen(false);
+                        navigate("/employer/jobpost");
+                      }}
+                      style={{ padding: "10px", cursor: "pointer", color: "#16a34a" }}
                     >
-                      Logout
-                    </button>
+                      Create Job
+                    </div>
+                  )}
+
+                  <hr />
+
+                  {/* LOGOUT */}
+                  <div
+                    onClick={() => {
+                      setUser(null);
+                      localStorage.removeItem("student");
+                      localStorage.removeItem("employer");
+                      navigate("/login");
+                    }}
+                    style={{ padding: "10px", cursor: "pointer", color: "red" }}
+                  >
+                    Logout
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
+
+
         </div>
       </nav>
 
-      {/* SPACE FOR FIXED NAVBAR */}
-      <div className="h-16 sm:h-16 md:h-18"></div>
+      <div style={styles.spacer} />
     </>
   );
 }

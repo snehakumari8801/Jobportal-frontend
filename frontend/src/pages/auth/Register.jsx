@@ -29,7 +29,7 @@ export default function Register() {
       const res = await axiosInstance.post(url, payload);
       toast.success(`${role === "student" ? "Student" : "Employer"} registered successfully!`);
       localStorage.setItem(role, JSON.stringify(res.data));
-      navigate(`/${role}/dashboard`);
+      navigate(`/`);
     } catch (err) {
       toast.error(err.response?.data?.message || "Registration failed");
     } finally {

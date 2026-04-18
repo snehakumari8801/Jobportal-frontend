@@ -62,7 +62,7 @@ export default function ApplyJob() {
         style: { background:"#1f2937", color:"#f9fafb", border:"1px solid #374151", fontFamily:"'DM Sans',sans-serif", fontSize:"14px", borderRadius:"10px" }
       }} />
 
-      <div style={{ minHeight:"100vh", background:"#0d1117", backgroundImage:"radial-gradient(ellipse at 20% 10%, rgba(226,185,111,0.04) 0%, transparent 50%)" }}>
+      <div style={{ minHeight:"100vh",  backgroundImage:"radial-gradient(ellipse at 20% 10%, rgba(226,185,111,0.04) 0%, transparent 50%)" }}>
         <Navbar />
         <Sidebar />
 
@@ -76,7 +76,7 @@ export default function ApplyJob() {
                 Application form
               </span>
             </div>
-            <h1 style={{ fontFamily:"'Playfair Display',serif", fontSize:"clamp(28px,5vw,42px)", fontWeight:800, letterSpacing:"-.03em", lineHeight:1.1, background:"linear-gradient(135deg,#f9fafb 30%,#e2b96f 100%)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
+            <h1 style={{ fontFamily:"'Playfair Display',serif", fontSize:"clamp(28px,5vw,42px)", fontWeight:800, letterSpacing:"-.03em", lineHeight:1.1,  }}>
               Apply for this position
             </h1>
             <p style={{ fontSize:"14px", color:"#6b7280", marginTop:"8px", fontWeight:300 }}>

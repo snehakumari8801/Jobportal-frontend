@@ -22,7 +22,7 @@ const s = {
     maxWidth: "480px",
     overflow: "hidden",
   },
-  banner: { height: "80px", background: "#e2b96f", position: "relative" },
+  banner: { height: "80px", background: "rgb(17, 24, 39)", position: "relative" },
   avatar: {
     width: "64px", height: "64px", borderRadius: "50%",
     background: "#fff", border: "3px solid #fff",

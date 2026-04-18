@@ -31,8 +31,6 @@ function App() {
           <Route path="/employer/dashboard" element={<DashboardEmployer />} />
           <Route path="/dashboard/allJobs" element={<AllJobs />} />
           <Route path="/student/dashboard/apply/:jobId" element={<ApplyJob />} />
-
-
           <Route path="/employer/jobpost" element={<JobPostEmployer />} />
           <Route path="/employer/dashboard/:jobId/:studentId" element={<AppliedUserProfile />} />
 

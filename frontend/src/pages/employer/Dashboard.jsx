@@ -20,7 +20,7 @@ function ApplicantsModal({ applicants, onClose, jobId }) {
         justifyContent: "center",
         alignItems: "center",
         zIndex: 1000,
-        padding: "16px",
+        padding: "10px",
       }}
     >
       <div
@@ -181,7 +181,7 @@ function JobCard({ job, onViewApplicants, onDelete }) {
         background: "#13192b",
         border: "1px solid #1f2937",
         borderRadius: "14px",
-        padding: "20px",
+        padding: "30px",
         display: "flex",
         flexDirection: "column",
         gap: "10px",
@@ -216,7 +216,7 @@ function JobCard({ job, onViewApplicants, onDelete }) {
               color: "#0d1117",
               border: "none",
               borderRadius: "9px",
-              padding: "8px 16px",
+              padding: "12px 16px",
               fontSize: "13px",
               fontWeight: 700,
               cursor: "pointer",
