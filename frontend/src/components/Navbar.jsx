@@ -7,7 +7,8 @@ import axiosInstance from "../api/axiosInstance";
 import { FaBell, FaTimes, FaUserCircle, FaBriefcase } from "react-icons/fa";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:5000");
+// const socket = io("http://localhost:5000");
+const socket = io("https://jobportal-backend-be9i.onrender.com");
 
 export default function Navbar() {
   const { setUser } = useAuth();

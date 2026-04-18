@@ -96,7 +96,7 @@ function JobCard({
         )}
         {resume && (
           <a
-            href={`http://localhost:5000/${resume}`}
+            href={`https://jobportal-backend-be9i.onrender.com/${resume}`}
             target="_blank"
             rel="noopener noreferrer"
             style={{ ...linkStyle, color: "#34d399", fontWeight: "600" }}

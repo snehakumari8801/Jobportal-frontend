@@ -505,7 +505,7 @@ export default function AppliedUserProfile() {
                 <span style={styles.infoLabel}>Resume</span>
                 <div style={{ marginTop: "6px" }}>
                   <a
-                    href={`http://localhost:5000/${app.resume}`}
+                    href={`https://jobportal-backend-be9i.onrender.com/${app.resume}`}
                     target="_blank"
                     rel="noreferrer"
                     style={styles.resumeBtn}
