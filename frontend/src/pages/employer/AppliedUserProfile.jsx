@@ -4,6 +4,7 @@ import axiosInstance from "../../api/axiosInstance";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import axios from "axios";
 
 // ── icon components ───────────────────────────────────────────────────────────
 const IconBriefcase = () => (
@@ -78,6 +79,9 @@ export default function AppliedUserProfile() {
         `https://jobportal-backend-be9i.onrender.com/api/employers/jobs/${params.jobId}/applicants/${params.studentId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      
+      
+      
       setData(response.data);
       const app = response.data.job.applications.find(
         (a) => a.studentId === params.studentId
