@@ -69,8 +69,13 @@ export default function AppliedUserProfile() {
   const fetchDetails = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get(
-        `/employers/jobs/${params.jobId}/applicants/${params.studentId}`,
+      // const response = await axiosInstance.get(
+      //   `/employers/jobs/${params.jobId}/applicants/${params.studentId}`,
+      //   { headers: { Authorization: `Bearer ${token}` } }
+      // );
+
+      const response = await axios.get(
+        `https://jobportal-backend-be9i.onrender.com/api/employers/jobs/${params.jobId}/applicants/${params.studentId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setData(response.data);
