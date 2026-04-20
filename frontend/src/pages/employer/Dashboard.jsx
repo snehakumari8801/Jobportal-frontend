@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import toast, { Toaster } from "react-hot-toast";
 import Navbar from "../../components/Navbar";
+import {Link} from "react-router-dom"
 
 // ─────────────────────────────────────────────
 // APPLICANTS MODAL
@@ -145,7 +146,7 @@ function ApplicantsModal({ applicants, onClose, jobId }) {
 
                   {/* View Link */}
 
-                  <a href={`/employer/dashboard/${jobId}/${a.studentId}`}
+                  <Link to={`/employer/dashboard/${jobId}/${a.studentId}`}
                     style={{
                       background: "rgba(226,185,111,0.1)",
                       border: "1px solid rgba(226,185,111,0.25)",
@@ -160,7 +161,7 @@ function ApplicantsModal({ applicants, onClose, jobId }) {
                     }}
                   >
                     View Application
-                  </a>
+                  </Link>
                 </div>
               ))}
             </div>
