@@ -1,17 +1,4 @@
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
@@ -103,14 +90,12 @@ const styles = {
     justifyContent: "center",
   },
 
-  // ✅ FIXED DROPDOWN (RESPONSIVE)
   dropdown: {
     position: "absolute",
     right: 0,
     top: "calc(100% + 10px)",
-    width: "min(320px, 92vw)",   // 🔥 IMPORTANT FIX
+    width: "min(320px, 92vw)",
     maxWidth: "320px",
-
     background: "#fff",
     borderRadius: "14px",
     boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
@@ -233,12 +218,71 @@ export default function Navbar() {
     fetchData();
   }, []);
 
+  // mark notifications as seen
+  const markAsSeen = async () => {
+    try {
+      const url =
+        role === "student"
+          ? "/students/notifications"
+          : "/employers/notifications";
+
+      await axiosInstance.patch(url, {}, {
+        headers: {
+          Authorization: `Bearer ${userData?.token}`,
+        },
+      });
+
+
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    } catch (err) {
+      console.error("Failed to mark notifications as seen", err);
+    }
+  };
+
+  // const handleBellClick = () => {
+  //   const isOpening = !open;
+  //   setOpen(isOpening);
+  //   setProfileOpen(false);
+
+  //   // call API only when opening and there are unread notifications
+  //   if (isOpening && notifications.some((n) => !n.read)) {
+  //     markAsSeen();
+  //   }
+  // };
+
+  // const handleClose = () => setOpen(false);
+
   const handleBellClick = () => {
     setOpen(!open);
     setProfileOpen(false);
   };
 
-  const handleClose = () => setOpen(false);
+  const handleClose = async () => {
+    setOpen(false);
+
+    // mark as seen on backend + clear list
+    if (notifications.length > 0) {
+      try {
+        const url =
+          role === "student"
+            ? "/students/notifications"
+            : "/employers/notifications";
+
+        await axiosInstance.patch(url, {}, {
+          headers: {
+            Authorization: `Bearer ${userData?.token}`,
+          },
+        });
+      } catch (err) {
+        console.error("Failed to mark notifications as seen", err);
+      }
+
+      // ✅ Clear both count and messages
+      setNotifications([]);
+    }
+  };
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const initials = userData?.name
     ? userData.name
@@ -262,11 +306,6 @@ export default function Navbar() {
               navigate(role === "employer" ? "/employer/dashboard" : "/student/dashboard")
             }
           >
-            {/* ── LEFT: Logo + Brand (no Create Job button here anymore) ── */}
-            {/* <div
-           style={styles.left}
-            onClick={() => navigate(role === "employer" ? "/employer/dashboard" : "/student/dashboard")}
-          > */}
             <div style={styles.logoBox}>
               <img
                 src="/rnu.jpg"
@@ -276,16 +315,16 @@ export default function Navbar() {
             </div>
             <span style={styles.brandName}>Job App</span>
           </div>
-          {/* </div> */}
 
           {/* RIGHT */}
           <div style={styles.right}>
+
             {/* BELL */}
             <div style={{ position: "relative" }} ref={dropdownRef}>
               <button style={styles.bellBtn} onClick={handleBellClick}>
                 <FaBell />
-                {notifications.length > 0 && (
-                  <span style={styles.badge}>{notifications.length}</span>
+                {unreadCount > 0 && (
+                  <span style={styles.badge}>{unreadCount}</span>
                 )}
               </button>
 
@@ -293,7 +332,13 @@ export default function Navbar() {
                 <div style={styles.dropdown}>
                   <div style={styles.dropHeader}>
                     <b>Notifications</b>
-                    <FaTimes onClick={handleClose} style={{ cursor: "pointer" }} />
+                    <FaTimes
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleClose();
+                      }}
+                      style={{ cursor: "pointer" }}
+                    />
                   </div>
 
                   <div style={styles.dropBody}>
@@ -310,7 +355,6 @@ export default function Navbar() {
                 </div>
               )}
             </div>
-
 
             {/* PROFILE */}
             <div style={{ position: "relative", textAlign: "center", fontSize: "15px", fontWeight: "800px" }} ref={profileRef}>
@@ -332,7 +376,6 @@ export default function Navbar() {
                     <p style={{ margin: 0, fontWeight: 600 }}>
                       {role === "employer" ? userData?.company : userData?.name}
                     </p>
-
                     <p style={{ margin: 0, fontSize: "15px", color: "#191919" }}>
                       {role}
                     </p>
@@ -384,8 +427,6 @@ export default function Navbar() {
               )}
             </div>
           </div>
-
-
         </div>
       </nav>
 

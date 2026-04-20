@@ -8,10 +8,56 @@ import { useNavigate } from "react-router-dom";
 function JobCard({ job, index }) {
   const [hovered, setHovered] = useState(false);
   const navigate = useNavigate();
-  
-  const handleApply = async (jobId) => {
-    navigate(`/student/dashboard/apply/${jobId}`);
 
+  // ✅ Get logged-in student id
+  const studentId = JSON.parse(localStorage.getItem("student"))?._id;
+
+  // ✅ Find if this student applied
+  const application = job.applications?.find(
+    (app) => app.studentId === studentId
+  );
+  const applied = !!application;
+  const status = application?.status;
+
+  const handleApply = () => {
+    if (applied) return;
+    navigate(`/student/dashboard/apply/${job._id}`);
+  };
+
+  // ✅ Button config based on status
+  const getButtonStyle = () => {
+    if (!applied) return {
+      background: "rgba(226,185,111,0.07)",
+      color: "#e2b96f",
+      borderColor: "rgba(226,185,111,0.3)",
+      cursor: "pointer",
+    };
+    if (status === "accepted") return {
+      background: "rgba(74,222,128,0.08)",
+      color: "#4ade80",
+      borderColor: "rgba(74,222,128,0.3)",
+      cursor: "default",
+    };
+    if (status === "rejected") return {
+      background: "rgba(248,113,113,0.08)",
+      color: "#f87171",
+      borderColor: "rgba(248,113,113,0.3)",
+      cursor: "default",
+    };
+    // pending
+    return {
+      background: "rgba(251,191,36,0.08)",
+      color: "#fbbf24",
+      borderColor: "rgba(251,191,36,0.3)",
+      cursor: "default",
+    };
+  };
+
+  const getButtonLabel = () => {
+    if (!applied) return "Apply Now";
+    if (status === "accepted") return "✅ Accepted";
+    if (status === "rejected") return "❌ Rejected";
+    return "⏳ Pending";
   };
 
   return (
@@ -111,29 +157,35 @@ function JobCard({ job, index }) {
           }}>{job.requiredEducation}</span>
         </div>
 
-        {/* Apply Button */}
+        {/* ✅ Apply Button with status */}
         <button
+          onClick={handleApply}
+          disabled={applied}
           style={{
             fontFamily: "'DM Sans', sans-serif",
             fontSize: "12px", fontWeight: "600",
             letterSpacing: "0.06em", textTransform: "uppercase",
             padding: "9px 20px", borderRadius: "8px",
-            border: "1px solid rgba(226,185,111,0.3)",
-            background: "rgba(226,185,111,0.07)",
-            color: "#e2b96f", cursor: "pointer",
+            border: `1px solid ${getButtonStyle().borderColor}`,
+            background: getButtonStyle().background,
+            color: getButtonStyle().color,
+            cursor: getButtonStyle().cursor,
             transition: "all 0.2s ease",
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.background = "rgba(226,185,111,0.15)";
-            e.currentTarget.style.borderColor = "#e2b96f";
+            if (!applied) {
+              e.currentTarget.style.background = "rgba(226,185,111,0.15)";
+              e.currentTarget.style.borderColor = "#e2b96f";
+            }
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.background = "rgba(226,185,111,0.07)";
-            e.currentTarget.style.borderColor = "rgba(226,185,111,0.3)";
+            if (!applied) {
+              e.currentTarget.style.background = "rgba(226,185,111,0.07)";
+              e.currentTarget.style.borderColor = "rgba(226,185,111,0.3)";
+            }
           }}
-          onClick={()=>handleApply(job._id)}
         >
-          Apply Now
+          {getButtonLabel()}
         </button>
       </div>
     </div>
@@ -160,6 +212,11 @@ export default function AllJobs() {
   }
 
   useEffect(() => { getAllJob(); }, []);
+jobs.forEach(job => {
+  job.applications.forEach(app => {
+    console.log(app.status);
+  });
+});
 
   return (
     <>
