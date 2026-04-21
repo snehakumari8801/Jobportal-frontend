@@ -6,6 +6,8 @@ import Navbar from "../../components/Navbar";
 
 const INITIAL_STATE = {
   title: "",
+    location: "",
+
   description: "",
   requiredSkills: "",
   requiredEducation: "",
@@ -60,6 +62,8 @@ export default function PostJob() {
         "/jobs/createJob",
         {
           title: job.title,
+                    location: job.location,
+
           description: job.description,
           requiredEducation: job.requiredEducation,
           requiredSkills: skillsArray,
@@ -164,6 +168,23 @@ export default function PostJob() {
                 placeholder="e.g. Frontend Developer"
                 style={inputStyle("title")}
                 onFocus={() => setFocusedField("title")}
+                onBlur={() => setFocusedField(null)}
+                required
+              />
+            </div>
+
+             <div>
+              <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#94a3b8", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "7px" }}>
+               Location
+              </label>
+              <input
+                type="text"
+                name="location"
+                value={job.location}
+                onChange={handleChange}
+                placeholder="e.g. Riga, Latvia"
+                style={inputStyle("location")}
+                onFocus={() => setFocusedField("location")}
                 onBlur={() => setFocusedField(null)}
                 required
               />

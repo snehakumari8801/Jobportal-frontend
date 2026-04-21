@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 
 // ── icon components ───────────────────────────────────────────────────────────
 const IconBriefcase = () => (
@@ -102,6 +103,11 @@ export default function AppliedUserProfile() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setStatus(newStatus);
+       toast.success(
+      newStatus === "accepted"
+        ? "Application Accepted ✅"
+        : "Application Rejected ❌"
+    );
     } catch (err) {
       console.log(err);
     }
@@ -383,7 +389,8 @@ export default function AppliedUserProfile() {
       {/* TOP BANNER */}
 
 
-      <Navbar />
+  <Toaster />
+  <Navbar />      
 
       <div style={S.page}>
         {/* HERO */}
