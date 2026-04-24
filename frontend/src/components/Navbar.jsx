@@ -6,7 +6,7 @@ import axiosInstance from "../api/axiosInstance";
 import { FaBell, FaTimes } from "react-icons/fa";
 import { io } from "socket.io-client";
 
-const socket = io("https://jobportal-backend-be9i.onrender.com");
+const socket = io("https://jobportal-backend-12-vt48.onrender.com");
 
 const styles = {
   nav: {

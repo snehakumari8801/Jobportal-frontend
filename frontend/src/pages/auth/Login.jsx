@@ -13,29 +13,85 @@ export default function Login() {
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const url = role === "student" ? "/students/login" : "/employers/login";
-      const res = await axiosInstance.post(url, form);
-      toast.success("Welcome back!");
-      const userData = { ...res.data, role };
-      if (role === "student") {
-        localStorage.setItem("student", JSON.stringify(userData));
-        localStorage.removeItem("employer");
-      } else {
-        localStorage.setItem("employer", JSON.stringify(userData));
-        localStorage.removeItem("student");
-      }
-      navigate(role === "student" ? "/student/dashboard" : "/employer/dashboard");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Invalid credentials");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const st = JSON.parse(localStorage.getItem("student"));
+  const isCompleted = st?.isCompleted ?? st?.isComplete;
+  console.log(isCompleted)
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   try {
+  //     const url = role === "student" ? "/students/login" : "/employers/login";
+  //     const res = await axiosInstance.post(url, form);
+  //     toast.success("Welcome back!");
+  //     const userData = { ...res.data, role };
+  //     if (role === "student") {
+  //       localStorage.setItem("student", JSON.stringify(userData));
+  //       localStorage.removeItem("employer");
+  //     } else {
+  //       localStorage.setItem("employer", JSON.stringify(userData));
+  //       localStorage.removeItem("student");
+  //     }
 
+  //     if (role === "student") {
+  //       // console.log(st.isComplete)
+  //       navigate(isCompleted ? "/student/dashboard" : "/student/profile");
+  //     } else {
+  //       navigate("/employer/dashboard");
+  //     }
+  //     // navigate(role === "student" ? "/student/dashboard" : "/employer/dashboard");
+  //   } catch (err) {
+  //     toast.error(err.response?.data?.message || "Invalid credentials");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    const url =
+      role === "student"
+        ? "/students/login"
+        : "/employers/login";
+
+    const res = await axiosInstance.post(url, form);
+
+    toast.success("Welcome back!");
+
+    const userData = { ...res.data, role };
+
+    // store correctly
+    if (role === "student") {
+      localStorage.setItem("student", JSON.stringify(userData));
+      localStorage.removeItem("employer");
+    } else {
+      localStorage.setItem("employer", JSON.stringify(userData));
+      localStorage.removeItem("student");
+    }
+
+    // ✅ IMPORTANT: use response, not localStorage
+    if (role === "student") {
+      const isCompleted =
+        res.data?.isCompleted ?? res.data?.isComplete;
+
+      navigate(
+        isCompleted
+          ? "/student/dashboard"
+          : "/student/profile"
+      );
+    } else {
+      navigate("/employer/dashboard");
+    }
+
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Invalid credentials");
+  } finally {
+    setLoading(false);
+  }
+};
   const inputStyle = {
     width: "100%",
     padding: "12px 16px",
@@ -364,3 +420,117 @@ export default function Login() {
     </>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import { useState } from "react";
+// import axiosInstance from "../../api/axiosInstance";
+// import toast, { Toaster } from "react-hot-toast";
+// import { useNavigate } from "react-router-dom";
+
+// export default function Login() {
+//   const [form, setForm] = useState({ email: "", password: "" });
+//   const [role, setRole] = useState("student");
+//   const [loading, setLoading] = useState(false);
+//   const [showPassword, setShowPassword] = useState(false);
+//   const navigate = useNavigate();
+
+//   const handleChange = (e) =>
+//     setForm({ ...form, [e.target.name]: e.target.value });
+
+//   const handleSubmit = async (e) => {
+//   e.preventDefault();
+//   setLoading(true);
+
+//   try {
+//     const url =
+//       role === "student"
+//         ? "/students/login"
+//         : "/employers/login";
+
+//     const res = await axiosInstance.post(url, form);
+
+//     console.log("LOGIN RESPONSE:", res.data);
+
+//     const userData = { ...res.data, role };
+
+//     if (role === "student") {
+//       localStorage.setItem("student", JSON.stringify(userData));
+//       localStorage.removeItem("employer");
+//     } else {
+//       localStorage.setItem("employer", JSON.stringify(userData));
+//       localStorage.removeItem("student");
+//     }
+
+//     toast.success("Welcome back!");
+
+//     // only student uses profile check
+//     if (role === "student") {
+//       const isCompleted =
+//         userData?.isCompleted ?? userData?.isComplete;
+
+//       navigate(
+//         isCompleted
+//           ? "/student/dashboard"
+//           : "/student/profile"
+//       );
+//     } else {
+//       navigate("/employer/dashboard");
+//     }
+
+//   } catch (err) {
+//     console.log("LOGIN ERROR:", err.response?.data);
+//     toast.error(
+//       err.response?.data?.message || "Invalid credentials"
+//     );
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+
+//   return (
+//     <>
+//       <Toaster />
+
+//       {/* 🔥 YOUR ENTIRE UI STAYS SAME */}
+//       {/* (I did NOT change your design) */}
+
+//       <div>
+//         {/* Role toggle, inputs, styles → unchanged */}
+
+//         <form onSubmit={handleSubmit}>
+//           <input
+//             type="email"
+//             name="email"
+//             value={form.email}
+//             onChange={handleChange}
+//           />
+
+//           <input
+//             type="password"
+//             name="password"
+//             value={form.password}
+//             onChange={handleChange}
+//           />
+
+//           <button type="submit" disabled={loading}>
+//             Login
+//           </button>
+//         </form>
+//       </div>
+//     </>
+//   );
+// }

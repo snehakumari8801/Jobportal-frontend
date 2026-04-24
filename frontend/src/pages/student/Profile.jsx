@@ -1,9 +1,9 @@
 
-
 import { useState, useEffect } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import toast, { Toaster } from "react-hot-toast";
 import Navbar from "../../components/Navbar";
+import Sidebar from "../../components/Sidebar";
 
 const s = {
   page: {
@@ -29,6 +29,7 @@ const s = {
     display: "flex", alignItems: "center", justifyContent: "center",
     fontSize: "22px", fontWeight: 500, color: "#854F0B",
     position: "absolute", bottom: "-28px", left: "1.5rem",
+    overflow: "hidden"
   },
   body: { padding: "2.5rem 1.5rem 1.5rem" },
   name: { fontSize: "18px", fontWeight: 500, margin: "0 0 2px" },
@@ -77,15 +78,29 @@ function getInitials(name) {
 
 export default function Profile() {
   const [profile, setProfile] = useState({
-    name: "", education: "", skills: "", experience: "", role: "",
+    name: "", education: "", skills: "", experience: "",
+    role: "", github: "", portfolio: "", linkedin: "",
+    company: "", position: "", degreeStart: "", degreeEnd: "",
+    projects: "", dob: "", location: "", coverLetter: "",
+    resume: null, profileImage: null
   });
+
+  // ✅ Track new file uploads separately from existing URLs
+  const [newResume, setNewResume] = useState(null);
+  const [newProfileImage, setNewProfileImage] = useState(null);
 
   const fetchProfile = async () => {
     try {
       const res = await axiosInstance.get("/students/profile", {
         headers: { Authorization: `Bearer ${JSON.parse(localStorage.getItem("student")).token}` },
       });
-      setProfile({ ...res.data, skills: res.data.skills.join(", ") });
+      setProfile({
+        ...res.data,
+        skills: res.data.skills?.join(", ") || "",
+      });
+      // Clear new file selections on fetch
+      setNewResume(null);
+      setNewProfileImage(null);
     } catch {
       toast.error("Failed to load profile");
     }
@@ -94,19 +109,60 @@ export default function Profile() {
   const handleChange = e =>
     setProfile(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
+  const handleFileChange = e => {
+    const { name, files } = e.target;
+    if (!files[0]) return;
+    if (name === "resume") setNewResume(files[0]);
+    if (name === "profileImage") setNewProfileImage(files[0]);
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      await axiosInstance.put(
-        "/students/profile",
-        { ...profile, skills: profile.skills.split(",").map(s => s.trim()) },
-        { headers: { Authorization: `Bearer ${JSON.parse(localStorage.getItem("student")).token}` } }
+      const formData = new FormData();
+
+      // ✅ Append text fields only
+      const textFields = [
+        "name", "education", "experience", "role", "github",
+        "portfolio", "linkedin", "company", "position",
+        "degreeStart", "degreeEnd", "projects", "dob",
+        "location", "coverLetter"
+      ];
+
+      textFields.forEach(key => {
+        if (profile[key] !== null && profile[key] !== undefined) {
+          formData.append(key, profile[key]);
+        }
+      });
+
+      // ✅ Skills as JSON array
+      formData.append(
+        "skills",
+        JSON.stringify(profile.skills.split(",").map(s => s.trim()).filter(Boolean))
       );
+
+      // ✅ Only append files if new ones were selected
+      if (newResume) formData.append("resume", newResume);
+      if (newProfileImage) formData.append("profileImage", newProfileImage);
+
+      console.log(formData)
+
+      await axiosInstance.put("/students/profile", formData, {
+        headers: {
+          Authorization: `Bearer ${JSON.parse(localStorage.getItem("student")).token}`,
+          "Content-Type": "multipart/form-data"
+        }
+      });
+
       toast.success("Profile updated");
-    } catch {
+      fetchProfile(); // Refresh to get updated URLs
+    } catch (err) {
+      console.error(err);
       toast.error("Failed to update profile");
     }
   };
+
+  
 
   useEffect(() => { fetchProfile(); }, []);
 
@@ -115,40 +171,68 @@ export default function Profile() {
   return (
     <>
       <Navbar />
+      <Sidebar />
       <Toaster />
       <div style={s.page}>
         <form onSubmit={handleSubmit} style={s.card}>
 
-          {/* Amber banner + avatar */}
+          {/* Banner + Avatar */}
           <div style={s.banner}>
-            <div style={s.avatar}>{getInitials(profile.name)}</div>
+            <div style={s.avatar}>
+              <label htmlFor="profileImageUpload" style={{ cursor: "pointer", width: "100%", height: "100%" }}>
+                {newProfileImage ? (
+                  <img src={URL.createObjectURL(newProfileImage)} alt="profile"
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : profile.profileImage ? (
+                  <img
+                    src={typeof profile.profileImage === "string"
+                      ? `https://jobportal-backend-12-vt48.onrender.com${profile.profileImage}`
+                      : URL.createObjectURL(profile.profileImage)}
+                    alt="profile"
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                ) : getInitials(profile.name)}
+                <div style={{
+                  position: "absolute", bottom: "4px", right: "4px",
+                  background: "#e2b96f", width: "18px", height: "18px",
+                  borderRadius: "50%", display: "flex", alignItems: "center",
+                  justifyContent: "center", fontSize: "11px", color: "#111", fontWeight: "bold",
+                }}>✎</div>
+              </label>
+              <input id="profileImageUpload" type="file" name="profileImage"
+                accept="image/*" onChange={handleFileChange} style={{ display: "none" }} />
+            </div>
           </div>
 
           <div style={s.body}>
             <p style={s.name}>{profile.name || "Your name"}</p>
             <p style={s.sub}>Student profile</p>
 
-            {/* Basic info */}
             <div style={s.sectionLabel}>Basic info</div>
             <div style={s.field}>
               <label style={s.label}>Full name</label>
-              <input name="name" value={profile.name} onChange={handleChange}
-                placeholder="Jane Smith" style={s.input} />
+              <input name="name" value={profile.name} onChange={handleChange} style={s.input} />
             </div>
             <div style={s.field}>
               <label style={s.label}>Education</label>
-              <input name="education" value={profile.education} onChange={handleChange}
-                placeholder="B.Tech Computer Science, 2025" style={s.input} />
+              <input name="education" value={profile.education} onChange={handleChange} style={s.input} />
+            </div>
+            <div style={s.grid2}>
+              <div style={s.field}>
+                <label style={s.label}>Degree Start</label>
+                <input type="date" name="degreeStart" value={profile.degreeStart} onChange={handleChange} style={s.input} />
+              </div>
+              <div style={s.field}>
+                <label style={s.label}>Degree End</label>
+                <input type="date" name="degreeEnd" value={profile.degreeEnd} onChange={handleChange} style={s.input} />
+              </div>
             </div>
 
             <hr style={s.divider} />
 
-            {/* Skills */}
             <div style={s.sectionLabel}>Skills</div>
             <div style={s.field}>
-              <label style={s.label}>Skills (comma separated)</label>
-              <input name="skills" value={profile.skills} onChange={handleChange}
-                placeholder="React, Node.js, MongoDB" style={s.input} />
+              <input name="skills" value={profile.skills} onChange={handleChange} style={s.input} placeholder="e.g. React, Node.js, Python" />
             </div>
             {skillTags.length > 0 && (
               <div style={s.skillsWrap}>
@@ -158,31 +242,96 @@ export default function Profile() {
 
             <hr style={s.divider} />
 
-            {/* Experience */}
             <div style={s.sectionLabel}>Experience</div>
             <div style={s.grid2}>
-              <div style={s.field}>
-                <label style={s.label}>Years of experience</label>
-                <input type="number" name="experience" value={profile.experience}
-                  onChange={handleChange} placeholder="2" min="0" style={s.input} />
-              </div>
-              <div style={s.field}>
-                <label style={s.label}>Current role</label>
-                <input name="role" value={profile.role || ""} onChange={handleChange}
-                  placeholder="e.g. Intern" style={s.input} />
-              </div>
+              <input type="number" name="experience" value={profile.experience} onChange={handleChange} style={s.input} placeholder="Years" />
+              <input name="role" value={profile.role} onChange={handleChange} style={s.input} placeholder="Role" />
+            </div>
+            <div style={s.field}>
+              <label style={s.label}>Company</label>
+              <input name="company" value={profile.company} onChange={handleChange} style={s.input} />
+            </div>
+            <div style={s.field}>
+              <label style={s.label}>Position</label>
+              <input name="position" value={profile.position} onChange={handleChange} style={s.input} />
             </div>
 
-            {/* Footer */}
-            <div style={s.footer}>
-              <span style={{ fontSize: "12px", color: "#bbb" }}>
-                Changes are saved to your account
+            <hr style={s.divider} />
+
+            <div style={s.sectionLabel}>Links</div>
+            <div style={s.field}>
+              <input name="github" value={profile.github} onChange={handleChange} placeholder="GitHub" style={s.input} />
+            </div>
+            <div style={s.field}>
+              <input name="portfolio" value={profile.portfolio} onChange={handleChange} placeholder="Portfolio" style={s.input} />
+            </div>
+            <div style={s.field}>
+              <input name="linkedin" value={profile.linkedin} onChange={handleChange} placeholder="LinkedIn" style={s.input} />
+            </div>
+
+            <hr style={s.divider} />
+
+            <div style={s.sectionLabel}>Personal</div>
+            <div style={s.field}>
+              <label style={s.label}>DOB</label>
+              <input type="date" name="dob" value={profile.dob} onChange={handleChange} style={s.input} />
+            </div>
+            <div style={s.field}>
+              <input name="location" value={profile.location} onChange={handleChange} placeholder="Location" style={s.input} />
+            </div>
+
+            <hr style={s.divider} />
+
+            <div style={s.sectionLabel}>Projects</div>
+            <div style={s.field}>
+              <input name="projects" value={profile.projects} onChange={handleChange} style={s.input} />
+            </div>
+
+            <hr style={s.divider} />
+
+            <div style={s.sectionLabel}>Cover Letter</div>
+            <textarea name="coverLetter" value={profile.coverLetter} onChange={handleChange}
+              style={{ ...s.input, minHeight: "100px" }} />
+
+            <hr style={s.divider} />
+
+            <div style={s.sectionLabel}>Uploads</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+
+              {/* Show existing resume */}
+              {profile.resume && !newResume && (
+                <div style={{ fontSize: "13px" }}>
+                  📄 Current Resume:{" "}
+                  <a href={profile.resume.startsWith("http") ? profile.resume : `https://jobportal-backend-12-vt48.onrender.com${profile.resume}`}
+                    target="_blank" rel="noreferrer" style={{ color: "#854F0B" }}>
+                    View / Download
+                  </a>
+                </div>
+              )}
+
+              {/* Show new resume name if selected */}
+              {newResume && (
+                <div style={{ fontSize: "13px", color: "#333" }}>
+                  📄 New resume selected: <strong>{newResume.name}</strong>{" "}
+                  <span style={{ color: "#888", cursor: "pointer" }} onClick={() => setNewResume(null)}>✕ remove</span>
+                </div>
+              )}
+
+              <input type="file" name="resume" onChange={handleFileChange}
+                style={s.input} accept=".pdf,.doc,.docx" />
+              <span style={{ fontSize: "12px", color: "#888" }}>
+                Upload new resume to replace existing one
               </span>
+            </div>
+
+            <div style={s.footer}>
+              <span style={{ fontSize: "12px", color: "#bbb" }}>Changes are saved to your account</span>
               <div style={{ display: "flex", gap: "8px" }}>
                 <button type="button" style={s.btn} onClick={fetchProfile}>Discard</button>
                 <button type="submit" style={s.btnPrimary}>Save changes</button>
               </div>
             </div>
+
           </div>
         </form>
       </div>

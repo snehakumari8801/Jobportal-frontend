@@ -1,10 +1,10 @@
 
-
 import { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import toast, { Toaster } from "react-hot-toast";
 import Navbar from "../../components/Navbar";
-import {Link} from "react-router-dom"
+import { Link } from "react-router-dom"
+import Sidebar from "../../components/Sidebar";
 
 // ─────────────────────────────────────────────
 // APPLICANTS MODAL
@@ -175,101 +175,212 @@ function ApplicantsModal({ applicants, onClose, jobId }) {
 // ─────────────────────────────────────────────
 // JOB CARD
 // ─────────────────────────────────────────────
+const formatDate = (dateStr) => {
+  if (!dateStr) return "N/A";
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    month: "short", day: "numeric", year: "numeric",
+  });
+};
+
+const parseEducation = (str) => {
+  if (!str) return [];
+  return str.split(",").map((s) => s.trim()).filter(Boolean);
+};
+
 function JobCard({ job, onViewApplicants, onDelete }) {
+  const skills = job.requiredSkills || [];
+  const educations = parseEducation(job.requiredEducation);
+  const applicantCount = job.applicants?.length ?? 0;
+
   return (
-    <div
-      style={{
-        background: "#13192b",
-        border: "1px solid #1f2937",
-        borderRadius: "14px",
-        padding: "30px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "10px",
-        transition: "border-color 0.2s",
-      }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = "#374151"}
-      onMouseLeave={e => e.currentTarget.style.borderColor = "#1f2937"}
-    >
-      {/* Title + Buttons Row */}
-      <div style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
-        gap: "12px",
-        flexWrap: "wrap",
-      }}>
-        <h3 style={{
-          margin: 0,
-          fontSize: "16px",
-          fontWeight: 700,
-          color: "#f9fafb",
-        }}>
-          {job.title}
-        </h3>
+    <div style={cardStyle}>
 
-        {/* Button group */}
-        <div style={{ display: "flex", gap: "8px", flexShrink: 0, flexWrap: "wrap" }}>
-          <button
-            onClick={() => onViewApplicants(job)}
-            style={{
-              background: "#e2b96f",
-              color: "#0d1117",
-              border: "none",
-              borderRadius: "9px",
-              padding: "12px 16px",
-              fontSize: "13px",
-              fontWeight: 700,
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              transition: "opacity 0.2s",
-            }}
-            onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
-            onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-          >
-            View Applicants
-          </button>
-
-          <button
-            onClick={() => onDelete(job._id)}
-            style={{
-              background: "rgba(239,68,68,0.1)",
-              color: "#f87171",
-              border: "1px solid rgba(239,68,68,0.25)",
-              borderRadius: "9px",
-              padding: "8px 16px",
-              fontSize: "13px",
-              fontWeight: 700,
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-              transition: "all 0.2s",
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = "rgba(239,68,68,0.2)";
-              e.currentTarget.style.borderColor = "rgba(239,68,68,0.5)";
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = "rgba(239,68,68,0.1)";
-              e.currentTarget.style.borderColor = "rgba(239,68,68,0.25)";
-            }}
-          >
-            Delete
-          </button>
+      {/* ── Title + badges ── */}
+      <div>
+        <h3 style={titleStyle}>{job.title}</h3>
+        <div style={badgeRow}>
+          {job.location && <span style={{ ...badge, ...locBadge }}>📍 {job.location}</span>}
+          {job.jobType && <span style={{ ...badge, ...typeBadge }}>{job.jobType}</span>}
+          {job.workMode && <span style={{ ...badge, ...modeBadge }}>{job.workMode}</span>}
+          {job.salary && <span style={{ ...badge, ...salaryBadge }}>💰 {job.salary}</span>}
         </div>
       </div>
 
-      {/* Description */}
-      <p style={{
-        margin: 0,
-        fontSize: "13px",
-        color: "#6b7280",
-        lineHeight: "1.6",
-      }}>
-        {job.description}
-      </p>
+      {/* ── Buttons: 2-col grid, Delete spans full width ── */}
+      <div style={btnGrid}>
+        <Link to={`/employer/applications/${job._id}`} style={{ textDecoration: "none" }}>
+          <button style={{ ...goldBtn, width: "100%" }}
+            onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+            Recommendation 
+          </button>
+        </Link>
+        <button style={goldBtn}
+          onClick={() => onViewApplicants(job)}
+          onMouseEnter={hoverIn} onMouseLeave={hoverOut}>
+          View Applicants
+        </button>
+        <button style={dangerBtn}
+          onClick={() => onDelete(job._id)}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(239,68,68,0.2)";
+            e.currentTarget.style.borderColor = "rgba(239,68,68,0.5)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(239,68,68,0.1)";
+            e.currentTarget.style.borderColor = "rgba(239,68,68,0.25)";
+          }}>
+          Delete
+        </button>
+      </div>
+
+      {/* ── Description ── */}
+      {job.description && <p style={descStyle}>{job.description}</p>}
+
+      <div style={divider} />
+
+      {/* ── Skills + Education ── */}
+      <div style={infoGrid}>
+        {skills.length > 0 && (
+          <div style={section}>
+            <span style={metaLabel}>Required Skills</span>
+            <div style={badgeRow}>
+              {skills.map((s) => (
+                <span key={s} style={{ ...badge, ...skillBadge }}>{s}</span>
+              ))}
+            </div>
+          </div>
+        )}
+        {educations.length > 0 && (
+          <div style={section}>
+            <span style={metaLabel}>Education</span>
+            <div style={badgeRow}>
+              {educations.map((e) => (
+                <span key={e} style={{ ...badge, ...eduBadge }}>{e}</span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div style={divider} />
+
+      {/* ── Footer ── */}
+      <div style={footer}>
+        <span style={dateText}>Posted {formatDate(job.createdAt)}</span>
+        <span style={countPill}>
+          {applicantCount} {applicantCount === 1 ? "applicant" : "applicants"}
+        </span>
+      </div>
     </div>
   );
 }
+
+
+/* ─── Styles ─── */
+const cardStyle = {
+  background: "#13192b",
+  border: "1px solid #1f2937",
+  borderRadius: "14px",
+  padding: "16px",
+  display: "flex",
+  flexDirection: "column",
+  gap: "10px",
+  width: "85%",
+  transition: "border-color 0.2s",
+  marginTop:"30px"
+};
+
+const titleStyle = {
+  margin: "0 0 6px",
+  fontSize: "15px",
+  fontWeight: 700,
+  color: "#f9fafb",
+  lineHeight: 1.4,
+};
+
+const badgeRow = {
+  display: "flex",
+  gap: "6px",
+  flexWrap: "wrap",
+  alignItems: "center",
+};
+
+const btnGrid = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: "7px",
+  width: "90%",
+};
+
+const baseBtn = {
+  borderRadius: "9px",
+  padding: "10px 8px",
+  fontSize: "12px",
+  fontWeight: 700,
+  cursor: "pointer",
+  border: "none",
+  width: "100%",
+  transition: "opacity 0.2s",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+};
+
+const goldBtn = { ...baseBtn, background: "#e2b96f", color: "#0d1117" };
+const dangerBtn = {
+  ...baseBtn,
+  gridColumn: "1 / -1",
+  background: "rgba(239,68,68,0.1)",
+  color: "#f87171",
+  border: "1px solid rgba(239,68,68,0.25)",
+};
+
+const hoverIn = (e) => (e.currentTarget.style.opacity = "0.8");
+const hoverOut = (e) => (e.currentTarget.style.opacity = "1");
+
+const descStyle = {
+  margin: 0,
+  fontSize: "13px",
+  color: "#6b7280",
+  lineHeight: 1.7,
+};
+
+const divider = { height: "1px", background: "#1f2937" };
+
+const infoGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+  gap: "10px",
+};
+
+const section = { display: "flex", flexDirection: "column", gap: "5px" };
+
+const metaLabel = {
+  fontSize: "10px",
+  fontWeight: 700,
+  color: "#4b5563",
+  textTransform: "uppercase",
+  letterSpacing: "0.07em",
+};
+
+const badge = {
+  display: "inline-flex",
+  alignItems: "center",
+  padding: "3px 9px",
+  borderRadius: "20px",
+  fontSize: "11px",
+  fontWeight: 600,
+};
+
+const locBadge = { background: "#1f2937", color: "#9ca3af", border: "1px solid #374151" };
+const typeBadge = { background: "rgba(226,185,111,0.15)", color: "#c99a50", border: "1px solid rgba(226,185,111,0.35)" };
+const modeBadge = { background: "rgba(52,211,153,0.1)", color: "#34d399", border: "1px solid rgba(52,211,153,0.25)" };
+const salaryBadge = { background: "rgba(168,85,247,0.1)", color: "#c084fc", border: "1px solid rgba(168,85,247,0.25)" };
+const skillBadge = { background: "rgba(59,130,246,0.1)", color: "#60a5fa", border: "1px solid rgba(59,130,246,0.25)" };
+const eduBadge = { background: "rgba(52,211,153,0.1)", color: "#34d399", border: "1px solid rgba(52,211,153,0.25)" };
+
+const footer = { display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "6px" };
+const dateText = { fontSize: "11px", color: "#4b5563" };
+const countPill = { fontSize: "11px", padding: "3px 9px", borderRadius: "20px", background: "#1f2937", color: "#9ca3af", border: "1px solid #374151" };
 
 // ─────────────────────────────────────────────
 // SKELETON LOADER
@@ -363,6 +474,7 @@ export default function Dashboard() {
     <div style={{ background: "white", minHeight: "100vh" }}>
       <Toaster position="top-right" />
       <Navbar />
+      <Sidebar />
 
       <div style={{
         maxWidth: "860px",

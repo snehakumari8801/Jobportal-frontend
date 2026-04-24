@@ -77,7 +77,7 @@ export default function AppliedUserProfile() {
       // );
 
       const response = await axios.get(
-        `https://jobportal-backend-be9i.onrender.com/api/employers/jobs/${params.jobId}/applicants/${params.studentId}`,
+        `https://jobportal-backend-12-vt48.onrender.com/api/employers/jobs/${params.jobId}/applicants/${params.studentId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -112,6 +112,8 @@ export default function AppliedUserProfile() {
       console.log(err);
     }
   };
+
+  console.log(data)
 
   const S = {
     body: {
@@ -462,6 +464,20 @@ export default function AppliedUserProfile() {
                 <span key={skill} style={S.tag}>{skill}</span>
               ))}
             </div>
+
+             <hr style={S.divider} />
+              <span style={S.infoLabel}>Resume</span>
+              <div style={{ marginTop: "6px" }}>
+                <a
+                  href={`https://jobportal-backend-12-vt48.onrender.com/${student.resume}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={S.resumeBtn}
+                >
+                  <IconDownload />
+                  View Resume PDF
+                </a>
+              </div>
           </div>
         </div>
 
@@ -491,11 +507,11 @@ export default function AppliedUserProfile() {
                   <a href={app.linkedin} target="_blank" rel="noreferrer" style={S.infoLink}>{app.linkedin}</a>
                 </div>
               </div>
-              <hr style={S.divider} />
+              {/* <hr style={S.divider} />
               <span style={S.infoLabel}>Resume</span>
               <div style={{ marginTop: "6px" }}>
                 <a
-                  href={`https://jobportal-backend-be9i.onrender.com/${app.resume}`}
+                  href={`http://localhost:5000/${app.resume}`}
                   target="_blank"
                   rel="noreferrer"
                   style={S.resumeBtn}
@@ -503,7 +519,7 @@ export default function AppliedUserProfile() {
                   <IconDownload />
                   View Resume PDF
                 </a>
-              </div>
+              </div> */}
             </div>
           </div>
         )}

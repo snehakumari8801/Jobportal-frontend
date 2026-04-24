@@ -14,6 +14,8 @@ import ProfileStudent from "./pages/student/Profile"
 import AllJobs from "./pages/student/AllJobs";
 import ApplyJob from "./pages/student/ApplyJob";
 import AppliedUserProfile from "./pages/employer/AppliedUserProfile";
+import SavedJobs from "./pages/student/SavedJobs";
+import Applications from "./pages/employer/Applications";
 
 function App() {
   return (
@@ -33,9 +35,8 @@ function App() {
           <Route path="/student/dashboard/apply/:jobId" element={<ApplyJob />} />
           <Route path="/employer/jobpost" element={<JobPostEmployer />} />
           <Route path="/employer/dashboard/:jobId/:studentId" element={<AppliedUserProfile />} />
-
-
-
+          <Route path="/student/dashboard/saved" element={<SavedJobs />} />
+          <Route path="/employer/applications/:jobId" element={<Applications />} />
         </Routes>
       </div>
     </Router>
