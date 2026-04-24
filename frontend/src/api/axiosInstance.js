@@ -38,7 +38,7 @@
 import axios from "axios";
 
 // ✅ Base URL (for socket, files, etc.)
-export const base = "https://jobportal-backend-111.onrender.com";
+export const base = "https://jobportal-backend-1234.onrender.com";
 // export const base = "http://localhost:5000";
 
 
