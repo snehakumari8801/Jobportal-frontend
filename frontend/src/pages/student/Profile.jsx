@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import axiosInstance from "../../api/axiosInstance";
+import axiosInstance, { base } from "../../api/axiosInstance";
 import toast, { Toaster } from "react-hot-toast";
 import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
@@ -186,7 +186,7 @@ export default function Profile() {
                 ) : profile.profileImage ? (
                   <img
                     src={typeof profile.profileImage === "string"
-                      ? `https://jobportal-backend-12-vt48.onrender.com${profile.profileImage}`
+                      ? `${base}/${profile.profileImage}`
                       : URL.createObjectURL(profile.profileImage)}
                     alt="profile"
                     style={{ width: "100%", height: "100%", objectFit: "cover" }}
@@ -302,7 +302,7 @@ export default function Profile() {
               {profile.resume && !newResume && (
                 <div style={{ fontSize: "13px" }}>
                   📄 Current Resume:{" "}
-                  <a href={ `https://jobportal-backend-12-vt48.onrender.com/uploads/resumes/${profile.resume}`}
+                  <a href={ `${base}/${profile.resume}`}
                    download
                    target="_blank" rel="noreferrer" style={{ color: "#854F0B" }}>
                     View / Download

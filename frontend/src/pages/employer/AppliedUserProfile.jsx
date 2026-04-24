@@ -1,6 +1,6 @@
 
 
-import axiosInstance from "../../api/axiosInstance";
+import axiosInstance, { base } from "../../api/axiosInstance";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
@@ -76,8 +76,8 @@ export default function AppliedUserProfile() {
       //   { headers: { Authorization: `Bearer ${token}` } }
       // );
 
-      const response = await axios.get(
-        `https://jobportal-backend-12-vt48.onrender.com/api/employers/jobs/${params.jobId}/applicants/${params.studentId}`,
+      const response = await axiosInstance.get(
+        `/employers/jobs/${params.jobId}/applicants/${params.studentId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -469,7 +469,7 @@ export default function AppliedUserProfile() {
               <span style={S.infoLabel}>Resume</span>
               <div style={{ marginTop: "6px" }}>
                 <a
-                  href={`https://jobportal-backend-12-vt48.onrender.com/${student.resume}`}
+                  href={`${base}/${student.resume}`}
                   target="_blank"
                   rel="noreferrer"
                   style={S.resumeBtn}

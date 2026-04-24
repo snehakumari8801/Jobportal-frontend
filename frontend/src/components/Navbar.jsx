@@ -2,11 +2,11 @@
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
-import axiosInstance from "../api/axiosInstance";
+import axiosInstance, { base } from "../api/axiosInstance";
 import { FaBell, FaTimes } from "react-icons/fa";
 import { io } from "socket.io-client";
 
-const socket = io("https://jobportal-backend-12-vt48.onrender.com");
+const socket = io(`${base}`);
 
 const styles = {
   nav: {

@@ -1,7 +1,21 @@
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import axiosInstance from "../../api/axiosInstance";
+import axiosInstance, { base } from "../../api/axiosInstance";
 import Navbar from "../../components/Navbar";
 
 export default function Applications() {
@@ -69,7 +83,7 @@ export default function Applications() {
                                 <img
                                     src={
                                         app.profileImage
-                                            ? `https://jobportal-backend-12-vt48.onrender.com/${app.profileImage}`
+                                            ? `${base}/${app.profileImage}`
                                             : "https://via.placeholder.com/80"
                                     }
                                     alt="profile"

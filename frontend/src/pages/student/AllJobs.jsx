@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import axiosInstance from "../../api/axiosInstance";
+import axiosInstance, { base } from "../../api/axiosInstance";
 import toast, { Toaster } from "react-hot-toast";
 import Navbar from "../../components/Navbar";
 import { useNavigate } from "react-router-dom";
@@ -157,7 +157,7 @@ function JobCard({
             )}
             {resume && (
               
-            <a    href={`https://jobportal-backend-12-vt48.onrender.com/${resume}`}
+            <a    href={`${base}/${resume}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ ...linkStyle, color: "#34d399" }}
