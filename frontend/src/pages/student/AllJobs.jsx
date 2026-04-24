@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import axiosInstance, { base } from "../../api/axiosInstance";
+import axiosInstance from "../../api/axiosInstance";
 import toast, { Toaster } from "react-hot-toast";
 import Navbar from "../../components/Navbar";
 import { useNavigate } from "react-router-dom";
@@ -22,6 +22,7 @@ function JobCard({
   portfolio,
   resume,
 }) {
+  console.log("Job",job)
   const [hovered, setHovered] = useState(false);
   const { savedJobs, toggleSaveJob } = useJobs();
 
@@ -252,6 +253,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
 
+
   const navigate = useNavigate();
   const student = JSON.parse(localStorage.getItem("student") || "null");
 
@@ -263,13 +265,13 @@ export default function Dashboard() {
     try {
       setLoading(true);
 
-      const res = await axiosInstance.get("/students/jobs", {
+      const res = await axiosInstance.get("/jobs/allJob", {
         headers: {
           Authorization: `Bearer ${student.token}`
         }
       });
 
-      setJobs(res.data || []);
+      setJobs(res.data.jobs);
       setDefaultJobs(res.data || []);
     } catch (err) {
       toast.error("Failed to fetch jobs");
@@ -328,7 +330,7 @@ export default function Dashboard() {
           <Search onSearch={handleSearch} />
 
           <h1 style={{ fontSize: "32px", marginBottom: "20px", color: "black" }}>
-            Suggested Jobs
+            All Jobs
           </h1>
 
           {loading && <p>Loading...</p>}
