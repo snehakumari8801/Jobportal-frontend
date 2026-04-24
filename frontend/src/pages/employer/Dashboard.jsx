@@ -296,6 +296,7 @@ const titleStyle = {
   fontWeight: 700,
   color: "#f9fafb",
   lineHeight: 1.4,
+  padding:"10px"
 };
 
 const badgeRow = {
@@ -483,7 +484,7 @@ export default function Dashboard() {
       }}>
 
         {/* Page Header */}
-        <div style={{ marginBottom: "24px" }}>
+        <div style={{ maxWidth: "780px", margin: "0 auto", padding: "48px 24px" }}>
           <h1 style={{ margin: 0, fontSize: "22px", fontWeight: 700, }}>
             Employer Dashboard
           </h1>
