@@ -302,8 +302,9 @@ export default function Profile() {
               {profile.resume && !newResume && (
                 <div style={{ fontSize: "13px" }}>
                   📄 Current Resume:{" "}
-                  <a href={profile.resume.startsWith("http") ? profile.resume : `https://jobportal-backend-12-vt48.onrender.com${profile.resume}`}
-                    target="_blank" rel="noreferrer" style={{ color: "#854F0B" }}>
+                  <a href={ `https://jobportal-backend-12-vt48.onrender.com/uploads/resumes/${profile.resume}`}
+                   download
+                   target="_blank" rel="noreferrer" style={{ color: "#854F0B" }}>
                     View / Download
                   </a>
                 </div>
